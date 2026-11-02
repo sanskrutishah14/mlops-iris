@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-api
+spec:
+  type: LoadBalancer      # gets a public IP on AKS; use port-forward locally
+  selector:
+    app: iris-api
+  ports:
+    - port: 80
+      targetPort: 8000

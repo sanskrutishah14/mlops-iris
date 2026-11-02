@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install flake8==7.1.1
+      - name: Lint with flake8
+        run: flake8 .
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+
+      - name: Train model (MLflow tracking + quality gate)
+        env:
+          MIN_ACCURACY: "0.90"
+        run: python src/train.py
+
+      - name: Run tests with coverage
+        run: pytest --cov=src --cov-report=term-missing --cov-report=xml
+
+      - name: Upload MLflow runs
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlruns
+          path: mlruns/
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t iris-api:ci .
+
+      - name: Run container and smoke test
+        run: |
+          docker run -d -p 8000:8000 --name iris iris-api:ci
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8000/health && break
+            sleep 2
+          done
+          curl -f http://localhost:8000/health
+          curl -f -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"sepal_length":5.1,"sepal_width":3.5,"petal_length":1.4,"petal_width":0.2}'
+          docker logs iris
+
+      - name: Scan image for vulnerabilities (report only)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: iris-api:ci
+          severity: CRITICAL,HIGH
+          exit-code: "0"

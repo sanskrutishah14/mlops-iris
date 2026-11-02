@@ -1,0 +1,9 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+mlruns/
+mlartifacts/
+models/*.joblib
+.pytest_cache/
+.env
