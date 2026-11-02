@@ -77,7 +77,7 @@ jobs:
           docker logs iris
 
       - name: Scan image for vulnerabilities (report only)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: iris-api:ci
           severity: CRITICAL,HIGH
