@@ -43,13 +43,13 @@ jobs:
         run: pytest --cov=src --cov-report=term-missing --cov-report=xml
 
       - name: Upload MLflow runs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mlruns
           path: mlruns/
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: coverage.xml
