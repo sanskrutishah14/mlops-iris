@@ -1,4 +1,4 @@
-.PHONY: install lint train test mlflow api ui docker k8s clean
+.PHONY: monitor tf-validate install lint train test mlflow api ui docker k8s clean
 
 install:
 	pip install -r requirements-dev.txt
@@ -20,3 +20,8 @@ k8s:
 	kubectl apply -f k8s/
 clean:
 	rm -rf mlruns models/*.joblib .pytest_cache .coverage coverage.xml
+
+monitor:
+	docker compose up -d --build
+tf-validate:
+	cd terraform && terraform init -backend=false && terraform validate

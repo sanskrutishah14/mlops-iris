@@ -9,3 +9,7 @@ tests
 k8s
 docs
 *.md
+terraform
+monitoring
+scripts
+docker-compose.yml

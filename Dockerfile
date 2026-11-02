@@ -3,9 +3,9 @@ FROM python:3.11-slim
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 
-COPY requirements.txt .
+COPY requirements-full.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --default-timeout=120 --retries 10 -r requirements.txt
+    pip install --default-timeout=120 --retries 10 -r requirements-full.txt
 
 COPY src/ ./src/
 COPY streamlit_app.py .

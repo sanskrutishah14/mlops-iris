@@ -22,6 +22,17 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform init and validate
+        working-directory: terraform
+        run: |
+          terraform init -backend=false
+          terraform validate
+
   test:
     needs: lint
     runs-on: ubuntu-latest
